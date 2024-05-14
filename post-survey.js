@@ -109,105 +109,84 @@ const questions = [
 ];
 
 const questionDiv = document.getElementById('question');
-let currentQuestionIndex = 0;
 const userAnswers = {};
 
-// Function to display current question
-function displayQuestion() {
-    const currentQuestion = questions[currentQuestionIndex];
-    questionDiv.innerHTML = `
-        <h2>${currentQuestion.question}</h2>
-        <div id="choices"></div>
-    `;
-    const choicesDiv = document.getElementById('choices');
+// Function to display all questions
+function displayQuestions() {
+    let questionHTML = '';
 
-    // Check if the current question has subquestions
-    if (currentQuestion.subquestions) {
-        // Loop through each subquestion
-        currentQuestion.subquestions.forEach(subquestion => {
-            const subquestionDiv = document.createElement('div');
-            subquestionDiv.innerHTML = `
-                <h3>${subquestion.question}</h3>
-                <div id="subquestion-choices-${subquestion.question.replace(/\s/g, '-')}"></div>
-            `;
-            choicesDiv.appendChild(subquestionDiv);
+    questions.forEach((question, qIndex) => {
+        questionHTML += `
+            <h3>${question.question}</h3>
+        `;
 
-            const subquestionChoicesDiv = document.getElementById(`subquestion-choices-${subquestion.question.replace(/\s/g, '-')}`);
-
-            // Check if the subquestion has sub-subquestions
-            if (subquestion.subsubquestions) {
-                subquestion.subsubquestions.forEach(subsubquestion => {
-                    const subsubquestionDiv = document.createElement('div');
-                    subsubquestionDiv.innerHTML = `
-                        <h4>${subsubquestion.question}</h4>
-                        <div id="subsubquestion-choices-${subsubquestion.question.replace(/\s/g, '-')}"></div>
-                    `;
-                    subquestionChoicesDiv.appendChild(subsubquestionDiv);
-
-                    const subsubquestionChoicesDiv = document.getElementById(`subsubquestion-choices-${subsubquestion.question.replace(/\s/g, '-')}`);
-                    subsubquestion.options.forEach(option => {
-                        const optionBtn = document.createElement('button');
-                        optionBtn.textContent = option;
-                        optionBtn.classList.add('btn');
-                        optionBtn.addEventListener('click', () => selectChoice(subsubquestion.question, option));
-                        subsubquestionChoicesDiv.appendChild(optionBtn);
-                    });
-                });
-            } else {
-                // If the subquestion has no sub-subquestions, handle the options
-                subquestion.options.forEach(option => {
-                    const optionBtn = document.createElement('button');
-                    optionBtn.textContent = option;
-                    optionBtn.classList.add('btn');
-                    optionBtn.addEventListener('click', () => selectChoice(subquestion.question, option));
-                    subquestionChoicesDiv.appendChild(optionBtn);
-                });
-            }
-        });
-    }
-}
-
-// Function to handle user choice selection
-function selectChoice(question, choice) {
-    // Save the user's answer
-    userAnswers[question] = choice;
-
-    // Check if all required questions have been answered
-    const allQuestionsAnswered = questions.every(question => {
         if (question.subquestions) {
-            return question.subquestions.every(subquestion => {
+            question.subquestions.forEach((subquestion, sqIndex) => {
+                questionHTML += `
+                    <h4>${subquestion.question}</h4>
+                `;
+
                 if (subquestion.subsubquestions) {
-                    return subquestion.subsubquestions.every(subsubquestion => userAnswers[subsubquestion.question]);
+                    subquestion.subsubquestions.forEach((subsubquestion, ssqIndex) => {
+                        questionHTML += `
+                            <h5>${subsubquestion.question}</h5>
+                            <div class="radio-group">
+                                ${subsubquestion.options.map(option => `
+                                    <div>
+                                        <input type="radio" id="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}-option${subsubquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}" value="${option}" required>
+                                        <label for="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}-option${subsubquestion.options.indexOf(option)}">${option}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    });
                 } else {
-                    return userAnswers[subquestion.question];
+                    questionHTML += `
+                        <div class="radio-group">
+                            ${subquestion.options.map(option => `
+                                <div>
+                                    <input type="radio" id="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}" value="${option}" required>
+                                    <label for="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
                 }
             });
         } else {
-            return userAnswers[question.question];
+            questionHTML += `
+                <div class="radio-group">
+                    ${question.options.map(option => `
+                        <div>
+                            <input type="radio" id="q${qIndex}-option${question.options.indexOf(option)}" name="q${qIndex}" value="${option}" required>
+                            <label for="q${qIndex}-option${question.options.indexOf(option)}">${option}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
     });
 
-    if (allQuestionsAnswered) {
-        // Display a thank you message
-        questionDiv.innerHTML = "<h2>Thank you for completing the questionnaire!</h2>";
-        // Redirect to the next page here
-    } else {
-        // Check if all subsubquestions of the current subquestion have been answered
-        const currentQuestion = questions[currentQuestionIndex];
-        const currentSubquestion = currentQuestion.subquestions.find(subquestion => {
-            if (subquestion.subsubquestions) {
-                return subquestion.subsubquestions.some(subsubquestion => !userAnswers[subsubquestion.question]);
-            }
-            return false;
-        });
-
-        if (!currentSubquestion) {
-            // All subsubquestions of the current subquestion have been answered, proceed to the next subquestion
-            currentQuestionIndex++;
-            displayQuestion();
-        }
-    }
+    questionDiv.innerHTML = questionHTML;
 }
 
-// Display the first question when the page loads
-window.onload = displayQuestion();
+// Function to handle form submission
+function handleSubmit(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+
+    formData.forEach((value, key) => {
+        userAnswers[key] = value;
+    });
+
+    questionDiv.innerHTML = "<h2>Thank you for participating!</h2>";
+    document.getElementById("submit-btn").style.display = "none";
+}
+
+// Display the questions when the page loads
+window.onload = displayQuestions();
+
+// Add an event listener for form submission
+const surveyForm = document.getElementById('survey-form');
+surveyForm.addEventListener('submit', handleSubmit);

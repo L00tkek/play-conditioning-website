@@ -87,6 +87,27 @@ nav ul li a {
 #bottom-nav:hover {
     background-color: #BC6C25;
 }
+
+.submit-btn {
+    background-color: #7CA982;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 15px auto;
+    padding: 15px 25px;
+    place-content: center;
+}
+
+.submit-btn:hover {
+    background-color: #243E36;
+}
+
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
   
   
 @media only screen and (max-width: 768px) {

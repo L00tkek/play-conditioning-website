@@ -8,22 +8,23 @@ const questions = [
       choices: ["Yes", "No"]
     },
     {
-      question: "Are you legally able to provide consent for the purposes of participating in this study?",
-      choices: ["Yes", "No"]
-    },
-    {
-      question: "You must be 18 years or older (or an adult in your country of origin).",
-      choices: [
-        "I confirm that I am 18 years or older.",
-        "I am not 18 years or older."
-      ]
-    },
-    {
-      question: "You must not have a cognitive impairment that requires you to have a legally authorized representative (LAR) provide consent for you.",
-      choices: [
-        "I confirm that I do not have a cognitive impairment.",
-        "I have a cognitive impairment."
-      ]
+      question: "Are you legally able to provide consent for the purposes of participating in this study? You must meet the following criteria:",
+      subquestions: [
+        {
+          question: "You must be 18 years or older (or an adult in your country of origin)",
+          options: [
+            "I confirm that I am 18 years or older.",
+            "I am not 18 years or older."
+          ]
+        },
+        {
+          question: "You must not have a cognitive impairment that requires you to have a legally authorized representative (LAR) provide consent for you",
+          options: [
+            "I confirm that I do not have a cognitive impairment.",
+            "I have a cognitive impairment."
+          ]
+        }
+      ],
     },
     {
       question: "Are you taking this on a personal computer?",
@@ -70,75 +71,66 @@ const questions = [
 ];
 
 const questionDiv = document.getElementById('question');
-let currentQuestionIndex = 0;
 const userAnswers = {};
 
-// Function to display current question
-function displayQuestion() {
-    const currentQuestion = questions[currentQuestionIndex];
-    questionDiv.innerHTML = `
-        <h2>${currentQuestion.question}</h2>
-        <div id="choices"></div>
-    `;
-    const choicesDiv = document.getElementById('choices');
+// Function to display all questions
+function displayQuestions() {
+  let questionHTML = '';
 
-    // Check if the current question has subquestions
-    if (currentQuestion.subquestions) {
-        // Loop through each subquestion
-        currentQuestion.subquestions.forEach(subquestion => {
-            const subquestionDiv = document.createElement('div');
-            subquestionDiv.innerHTML = `
-                <h3>${subquestion.question}</h3>
-                <div id="subquestion-choices-${subquestion.question.replace(/\s/g, '-')}"></div>
-            `;
-            choicesDiv.appendChild(subquestionDiv);
+  questions.forEach((question, qIndex) => {
+      questionHTML += `
+          <h3>${question.question}</h3>
+      `;
 
-            const subquestionChoicesDiv = document.getElementById(`subquestion-choices-${subquestion.question.replace(/\s/g, '-')}`);
-            subquestion.options.forEach(option => {
-                const optionBtn = document.createElement('button');
-                optionBtn.textContent = option;
-                optionBtn.classList.add('btn');
-                optionBtn.addEventListener('click', () => selectChoice(subquestion.question, option));
-                subquestionChoicesDiv.appendChild(optionBtn);
-            });
-        });
-    } else {
-        // If there are no subquestions, handle the choices
-        currentQuestion.choices.forEach(choice => {
-            const choiceBtn = document.createElement('button');
-            choiceBtn.textContent = choice;
-            choiceBtn.classList.add('btn');
-            choiceBtn.addEventListener('click', () => selectChoice(currentQuestion.question, choice));
-            choicesDiv.appendChild(choiceBtn);
-        });
-    }
+      if (question.subquestions) {
+          questionHTML += `
+              <div class="radio-group">
+                  ${question.subquestions.map((subquestion, sqIndex) => `
+                      <div>
+                          <h4>${subquestion.question}</h4>
+                          ${subquestion.options.map(option => `
+                              <div>
+                                  <input type="radio" id="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}" value="${option}" required>
+                                  <label for="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
+                              </div>
+                          `).join('')}
+                      </div>
+                  `).join('')}
+              </div>
+          `;
+      } else {
+          questionHTML += `
+              <div class="radio-group">
+                  ${question.choices.map(choice => `
+                      <div>
+                          <input type="radio" id="q${qIndex}-option${question.choices.indexOf(choice)}" name="q${qIndex}" value="${choice}" required>
+                          <label for="q${qIndex}-option${question.choices.indexOf(choice)}">${choice}</label>
+                      </div>
+                  `).join('')}
+              </div>
+          `;
+      }
+  });
+
+  questionDiv.innerHTML = questionHTML;
 }
 
-// Function to handle user choice selection
-function selectChoice(question, choice) {
-    // Save the user's answer
-    userAnswers[question] = choice;
+// Function to handle form submission
+function handleSubmit(event) {
+  event.preventDefault();
 
-    // Check if all required questions have been answered
-    const allQuestionsAnswered = questions.every(question => {
-        if (question.subquestions) {
-            return question.subquestions.every(subquestion => userAnswers[subquestion.question]);
-        } else {
-            return userAnswers[question.question];
-        }
-    });
+  const formData = new FormData(event.target);
 
-    if (allQuestionsAnswered) {
-        // Display a thank you message
-        questionDiv.innerHTML = "<h2>Thank you for completing the questionnaire!</h2>";
-    } else {
-        // Increment to the next question
-        currentQuestionIndex++;
-        if (currentQuestionIndex < questions.length) {
-            displayQuestion();
-        }
-    }
+  formData.forEach((value, key) => {
+      userAnswers[key] = value;
+  });
+
+  window.location.href = './game.html';
 }
 
-// Display the first question when the page loads
-window.onload = displayQuestion();
+// Display the questions when the page loads
+window.onload = displayQuestions();
+
+// Add an event listener for form submission
+const surveyForm = document.getElementById('survey-form');
+surveyForm.addEventListener('submit', handleSubmit);
