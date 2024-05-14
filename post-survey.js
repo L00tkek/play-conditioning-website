@@ -115,26 +115,26 @@ const userAnswers = {};
 function displayQuestions() {
     let questionHTML = '';
 
-    questions.forEach((question, qIndex) => {
+    questions.forEach((question, index) => {
         questionHTML += `
             <h3>${question.question}</h3>
         `;
 
         if (question.subquestions) {
-            question.subquestions.forEach((subquestion, sqIndex) => {
+            question.subquestions.forEach((subquestion, subIndex) => {
                 questionHTML += `
                     <h4>${subquestion.question}</h4>
                 `;
 
                 if (subquestion.subsubquestions) {
-                    subquestion.subsubquestions.forEach((subsubquestion, ssqIndex) => {
+                    subquestion.subsubquestions.forEach((subsubquestion, subsubIndex) => {
                         questionHTML += `
                             <h5>${subsubquestion.question}</h5>
                             <div class="radio-group">
                                 ${subsubquestion.options.map(option => `
                                     <div>
-                                        <input type="radio" id="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}-option${subsubquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}" value="${option}" required>
-                                        <label for="q${qIndex}-sq${sqIndex}-ssq${ssqIndex}-option${subsubquestion.options.indexOf(option)}">${option}</label>
+                                        <input type="radio" id="q${index}-sq${subIndex}-ssq${subsubIndex}-option${subsubquestion.options.indexOf(option)}" name="q${index}-sq${subIndex}-ssq${subsubIndex}" value="${option}" required>
+                                        <label for="q${index}-sq${subIndex}-ssq${subsubIndex}-option${subsubquestion.options.indexOf(option)}">${option}</label>
                                     </div>
                                 `).join('')}
                             </div>
@@ -145,8 +145,8 @@ function displayQuestions() {
                         <div class="radio-group">
                             ${subquestion.options.map(option => `
                                 <div>
-                                    <input type="radio" id="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}" value="${option}" required>
-                                    <label for="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
+                                    <input type="radio" id="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}" name="q${index}-sq${subIndex}" value="${option}" required>
+                                    <label for="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
                                 </div>
                             `).join('')}
                         </div>
@@ -158,8 +158,8 @@ function displayQuestions() {
                 <div class="radio-group">
                     ${question.options.map(option => `
                         <div>
-                            <input type="radio" id="q${qIndex}-option${question.options.indexOf(option)}" name="q${qIndex}" value="${option}" required>
-                            <label for="q${qIndex}-option${question.options.indexOf(option)}">${option}</label>
+                            <input type="radio" id="q${index}-option${question.options.indexOf(option)}" name="q${index}" value="${option}" required>
+                            <label for="q${index}-option${question.options.indexOf(option)}">${option}</label>
                         </div>
                     `).join('')}
                 </div>
@@ -188,5 +188,5 @@ function handleSubmit(event) {
 window.onload = displayQuestions();
 
 // Add an event listener for form submission
-const surveyForm = document.getElementById('survey-form');
+const surveyForm = document.getElementById('post-survey');
 surveyForm.addEventListener('submit', handleSubmit);

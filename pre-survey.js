@@ -77,7 +77,7 @@ const userAnswers = {};
 function displayQuestions() {
   let questionHTML = '';
 
-  questions.forEach((question, qIndex) => {
+  questions.forEach((question, index) => {
       questionHTML += `
           <h3>${question.question}</h3>
       `;
@@ -85,13 +85,13 @@ function displayQuestions() {
       if (question.subquestions) {
           questionHTML += `
               <div class="radio-group">
-                  ${question.subquestions.map((subquestion, sqIndex) => `
+                  ${question.subquestions.map((subquestion, subIndex) => `
                       <div>
                           <h4>${subquestion.question}</h4>
                           ${subquestion.options.map(option => `
                               <div>
-                                  <input type="radio" id="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}" name="q${qIndex}-sq${sqIndex}" value="${option}" required>
-                                  <label for="q${qIndex}-sq${sqIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
+                                  <input type="radio" id="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}" name="q${index}-sq${subIndex}" value="${option}" required>
+                                  <label for="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
                               </div>
                           `).join('')}
                       </div>
@@ -103,8 +103,8 @@ function displayQuestions() {
               <div class="radio-group">
                   ${question.choices.map(choice => `
                       <div>
-                          <input type="radio" id="q${qIndex}-option${question.choices.indexOf(choice)}" name="q${qIndex}" value="${choice}" required>
-                          <label for="q${qIndex}-option${question.choices.indexOf(choice)}">${choice}</label>
+                          <input type="radio" id="q${index}-option${question.choices.indexOf(choice)}" name="q${index}" value="${choice}" required>
+                          <label for="q${index}-option${question.choices.indexOf(choice)}">${choice}</label>
                       </div>
                   `).join('')}
               </div>
@@ -132,5 +132,5 @@ function handleSubmit(event) {
 window.onload = displayQuestions();
 
 // Add an event listener for form submission
-const surveyForm = document.getElementById('survey-form');
+const surveyForm = document.getElementById('pre-survey');
 surveyForm.addEventListener('submit', handleSubmit);
