@@ -8,23 +8,22 @@ const questions = [
       choices: ["Yes", "No"]
     },
     {
-      question: "Are you legally able to provide consent for the purposes of participating in this study? You must meet the following criteria:",
-      subquestions: [
-        {
-          question: "You must be 18 years or older (or an adult in your country of origin)",
-          options: [
-            "I confirm that I am 18 years or older.",
-            "I am not 18 years or older."
-          ]
-        },
-        {
-          question: "You must not have a cognitive impairment that requires you to have a legally authorized representative (LAR) provide consent for you",
-          options: [
-            "I confirm that I do not have a cognitive impairment.",
-            "I have a cognitive impairment."
-          ]
-        }
-      ],
+      question: "Are you legally able to provide consent for the purposes of participating in this study?",
+      choices: ["Yes", "No"]
+    },
+    {
+      question: "You must be 18 years or older (or an adult in your country of origin).",
+      choices: [
+        "I confirm that I am 18 years or older.",
+        "I am not 18 years or older."
+      ]
+    },
+    {
+      question: "You must not have a cognitive impairment that requires you to have a legally authorized representative (LAR) provide consent for you.",
+      choices: [
+        "I confirm that I do not have a cognitive impairment.",
+        "I have a cognitive impairment."
+      ]
     },
     {
       question: "Are you taking this on a personal computer?",
@@ -71,66 +70,75 @@ const questions = [
 ];
 
 const questionDiv = document.getElementById('question');
+let currentQuestionIndex = 0;
 const userAnswers = {};
 
-// Function to display all questions
-function displayQuestions() {
-  let questionHTML = '';
+// Function to display current question
+function displayQuestion() {
+    const currentQuestion = questions[currentQuestionIndex];
+    questionDiv.innerHTML = `
+        <h2>${currentQuestion.question}</h2>
+        <div id="choices"></div>
+    `;
+    const choicesDiv = document.getElementById('choices');
 
-  questions.forEach((question, index) => {
-      questionHTML += `
-          <h3>${question.question}</h3>
-      `;
+    // Check if the current question has subquestions
+    if (currentQuestion.subquestions) {
+        // Loop through each subquestion
+        currentQuestion.subquestions.forEach(subquestion => {
+            const subquestionDiv = document.createElement('div');
+            subquestionDiv.innerHTML = `
+                <h3>${subquestion.question}</h3>
+                <div id="subquestion-choices-${subquestion.question.replace(/\s/g, '-')}"></div>
+            `;
+            choicesDiv.appendChild(subquestionDiv);
 
-      if (question.subquestions) {
-          questionHTML += `
-              <div class="radio-group">
-                  ${question.subquestions.map((subquestion, subIndex) => `
-                      <div>
-                          <h4>${subquestion.question}</h4>
-                          ${subquestion.options.map(option => `
-                              <div>
-                                  <input type="radio" id="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}" name="q${index}-sq${subIndex}" value="${option}" required>
-                                  <label for="q${index}-sq${subIndex}-option${subquestion.options.indexOf(option)}">${option}</label>
-                              </div>
-                          `).join('')}
-                      </div>
-                  `).join('')}
-              </div>
-          `;
-      } else {
-          questionHTML += `
-              <div class="radio-group">
-                  ${question.choices.map(choice => `
-                      <div>
-                          <input type="radio" id="q${index}-option${question.choices.indexOf(choice)}" name="q${index}" value="${choice}" required>
-                          <label for="q${index}-option${question.choices.indexOf(choice)}">${choice}</label>
-                      </div>
-                  `).join('')}
-              </div>
-          `;
-      }
-  });
-
-  questionDiv.innerHTML = questionHTML;
+            const subquestionChoicesDiv = document.getElementById(`subquestion-choices-${subquestion.question.replace(/\s/g, '-')}`);
+            subquestion.options.forEach(option => {
+                const optionBtn = document.createElement('button');
+                optionBtn.textContent = option;
+                optionBtn.classList.add('btn');
+                optionBtn.addEventListener('click', () => selectChoice(subquestion.question, option));
+                subquestionChoicesDiv.appendChild(optionBtn);
+            });
+        });
+    } else {
+        // If there are no subquestions, handle the choices
+        currentQuestion.choices.forEach(choice => {
+            const choiceBtn = document.createElement('button');
+            choiceBtn.textContent = choice;
+            choiceBtn.classList.add('btn');
+            choiceBtn.addEventListener('click', () => selectChoice(currentQuestion.question, choice));
+            choicesDiv.appendChild(choiceBtn);
+        });
+    }
 }
 
-// Function to handle form submission
-function handleSubmit(event) {
-  event.preventDefault();
+// Function to handle user choice selection
+function selectChoice(question, choice) {
+    // Save the user's answer
+    userAnswers[question] = choice;
 
-  const formData = new FormData(event.target);
+    // Check if all required questions have been answered
+    const allQuestionsAnswered = questions.every(question => {
+        if (question.subquestions) {
+            return question.subquestions.every(subquestion => userAnswers[subquestion.question]);
+        } else {
+            return userAnswers[question.question];
+        }
+    });
 
-  formData.forEach((value, key) => {
-      userAnswers[key] = value;
-  });
-
-  window.location.href = './game.html';
+    if (allQuestionsAnswered) {
+        // Display a thank you message
+        questionDiv.innerHTML = "<h2>Thank you for completing the questionnaire!</h2>";
+    } else {
+        // Increment to the next question
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion();
+        }
+    }
 }
 
-// Display the questions when the page loads
-window.onload = displayQuestions();
-
-// Add an event listener for form submission
-const surveyForm = document.getElementById('pre-survey');
-surveyForm.addEventListener('submit', handleSubmit);
+// Display the first question when the page loads
+window.onload = displayQuestion();
