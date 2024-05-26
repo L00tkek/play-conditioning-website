@@ -146,11 +146,13 @@ function displayQuestion() {
 
                     const subsubquestionChoicesDiv = document.getElementById(`subsubquestion-choices-${subsubquestion.question.replace(/\s/g, '-')}`);
                     subsubquestion.options.forEach(option => {
-                        const optionBtn = document.createElement('button');
-                        optionBtn.textContent = option;
-                        optionBtn.classList.add('btn');
-                        optionBtn.addEventListener('click', () => selectChoice(subsubquestion.question, option));
-                        subsubquestionChoicesDiv.appendChild(optionBtn);
+                        const optionLabel = document.createElement('label');
+                        optionLabel.innerHTML = `
+                            <input type="radio" name="${subsubquestion.question}" value="${option}">
+                            ${option}
+                        `;
+                        subsubquestionChoicesDiv.appendChild(optionLabel);
+                        subsubquestionChoicesDiv.appendChild(document.createElement('br'));
                     });
                 });
             } else {
