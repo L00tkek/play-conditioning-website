@@ -1,3 +1,4 @@
+import userResponses from './userResponses.js';
 const questions = [
     {
         question: "For each game mechanic you were presented with, please rate how accurate you feel the following statements are:",
@@ -8,41 +9,41 @@ const questions = [
                     {
                         question: "I felt that [Mechanic 1] was an enjoyable mechanic.",
                         options: [
-                            "Strongly agree", 
-                            "Agree", 
-                            "Neither agree nor disagree", 
-                            "Disagree", 
+                            "Strongly agree",
+                            "Agree",
+                            "Neither agree nor disagree",
+                            "Disagree",
                             "Strongly disagree"
                         ]
                     },
                     {
                         question: "I felt that [Mechanic 1] was a mechanic that was easy to understand.",
                         options: [
-                            "Strongly agree", 
-                            "Agree", 
-                            "Neither agree nor disagree", 
-                            "Disagree", 
+                            "Strongly agree",
+                            "Agree",
+                            "Neither agree nor disagree",
+                            "Disagree",
                             "Strongly disagree"
                         ]
                     },
                     {
                         question: "I felt that [Mechanic 1] was a mechanic that was easy to use.",
                         options: [
-                            "Strongly agree", 
-                            "Agree", 
-                            "Neither agree nor disagree", 
-                            "Disagree", 
+                            "Strongly agree",
+                            "Agree",
+                            "Neither agree nor disagree",
+                            "Disagree",
                             "Strongly disagree"
                         ]
                     },
                     {
                         question: "I felt that [Mechanic 1] was a mechanic that I had never seen in any other video game before.",
                         options: [
-                            "Strongly agree", 
-                            "Agree", 
-                            "Neither agree nor disagree", 
-                            "Disagree", 
-                            "Strongly disagree", 
+                            "Strongly agree",
+                            "Agree",
+                            "Neither agree nor disagree",
+                            "Disagree",
+                            "Strongly disagree",
                             "N/A - I have never played a video game before"
                         ]
                     }
@@ -97,10 +98,10 @@ const questions = [
             {
                 question: "How strongly do you agree with the following statement: I felt that it was easy to switch between [Mechanic 1] and [Mechanic 2].",
                 options: [
-                    "Strongly agree", 
-                    "Agree", 
-                    "Neither agree nor disagree", 
-                    "Disagree", 
+                    "Strongly agree",
+                    "Agree",
+                    "Neither agree nor disagree",
+                    "Disagree",
                     "Strongly disagree"
                 ]
             }
@@ -146,13 +147,11 @@ function displayQuestion() {
 
                     const subsubquestionChoicesDiv = document.getElementById(`subsubquestion-choices-${subsubquestion.question.replace(/\s/g, '-')}`);
                     subsubquestion.options.forEach(option => {
-                        const optionLabel = document.createElement('label');
-                        optionLabel.innerHTML = `
-                            <input type="radio" name="${subsubquestion.question}" value="${option}">
-                            ${option}
-                        `;
-                        subsubquestionChoicesDiv.appendChild(optionLabel);
-                        subsubquestionChoicesDiv.appendChild(document.createElement('br'));
+                        const optionBtn = document.createElement('button');
+                        optionBtn.textContent = option;
+                        optionBtn.classList.add('btn');
+                        optionBtn.addEventListener('click', () => selectChoice(subsubquestion.question, option));
+                        subsubquestionChoicesDiv.appendChild(optionBtn);
                     });
                 });
             } else {
@@ -207,6 +206,65 @@ function selectChoice(question, choice) {
             // All subsubquestions of the current subquestion have been answered, proceed to the next subquestion
             currentQuestionIndex++;
             displayQuestion();
+        } else {
+            // Update the userResponses object with the user's answer
+            switch (question) {
+                case "I felt that [Mechanic 1] was an enjoyable mechanic.":
+                    userResponses.mechanic1Enjoyable = choice;
+                    break;
+                case "I felt that [Mechanic 1] was a mechanic that was easy to understand.":
+                    userResponses.mechanic1EasyToUnderstand = choice;
+                    break;
+                case "I felt that [Mechanic 1] was a mechanic that was easy to use.":
+                    userResponses.mechanic1EasyToUse = choice;
+                    break;
+                case "I felt that [Mechanic 1] was a mechanic that I had never seen in any other video game before.":
+                    userResponses.mechanic1Novel = choice;
+                    break;
+                case "I felt that [Mechanic 2] was an enjoyable mechanic.":
+                    userResponses.mechanic2Enjoyable = choice;
+                    break;
+                case "I felt that [Mechanic 2] was a mechanic that was easy to understand.":
+                    userResponses.mechanic2EasyToUnderstand = choice;
+                    break;
+                case "I felt that [Mechanic 2] was a mechanic that was easy to use.":
+                    userResponses.mechanic2EasyToUse = choice;
+                    break;
+                case "I felt that the [Mechanic 2] was a mechanic that I had never seen in any other video game before.":
+                    userResponses.mechanic2Novel = choice;
+                    break;
+                case "Between both [Mechanic 1] and [Mechanic 2], which mechanic did you feel like you preferred using?":
+                    if (choice === "I preferred using [Mechanic 1] much more than I preferred using [Mechanic 2].") {
+                        userResponses.mechanicPreference = "Strong Mechanic 1";
+                    } else if (choice === "I preferred using [Mechanic 1] slightly more than I preferred using [Mechanic 2].") {
+                        userResponses.mechanicPreference = "Slight Mechanic 1";
+                    } else if (choice === "I preferred using [Mechanic 1] about as much as I preferred using [Mechanic 2].") {
+                        userResponses.mechanicPreference = "None";
+                    } else if (choice === "I preferred using [Mechanic 2] slightly more than I preferred using [Mechanic 1].") {
+                        userResponses.mechanicPreference = "Slight Mechanic 2";
+                    } else if (choice === "I preferred using [Mechanic 2] much more than I preferred using [Mechanic 1].") {
+                        userResponses.mechanicPreference = "Strong Mechanic 2";
+                    }
+                    break;
+                case "Between [Mechanic 1] and [Mechanic 2], which mechanic did you feel like you used more often?":
+                    if (choice === "I used [Mechanic 1] much more frequently than [Mechanic 2].") {
+                        userResponses.mechanicFrequency = "Strong Mechanic 1";
+                    } else if (choice === "I used [Mechanic 1] slightly more frequently than [Mechanic 2].") {
+                        userResponses.mechanicFrequency = "Slight Mechanic 1";
+                    } else if (choice === "I used [Mechanic 1] about as often as [Mechanic 2].") {
+                        userResponses.mechanicFrequency = "None";
+                    } else if (choice === "I used [Mechanic 2] slightly more frequently than [Mechanic 1].") {
+                        userResponses.mechanicFrequency = "Slight Mechanic 2";
+                    } else if (choice === "I used [Mechanic 2] much more frequently than [Mechanic 1].") {
+                        userResponses.mechanicFrequency = "Strong Mechanic 2";
+                    }
+                    break;
+                case "How strongly do you agree with the following statement: I felt that it was easy to switch between [Mechanic 1] and [Mechanic 2].":
+                    userResponses.mechanicSwitchingEasy = choice;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
