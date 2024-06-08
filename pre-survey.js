@@ -1,3 +1,5 @@
+import userResponses from './userResponses.js';
+
 const questions = [
   {
     question: "Do you have access to a stable internet connection?",
@@ -69,7 +71,7 @@ const questions = [
   }
 ];
 
-const questionDiv = document.getElementById('question');
+const questionnaireDiv = document.getElementById('questionnaire');
 const userAnswers = {};
 
 function displayQuestions() {
@@ -80,7 +82,7 @@ function displayQuestions() {
       <h2>${question.question}</h2>
       <div id="choices-${questionIndex}"></div>
     `;
-    questionDiv.appendChild(questionContainer);
+    questionnaireDiv.appendChild(questionContainer);
 
     const choicesDiv = document.getElementById(`choices-${questionIndex}`);
 
@@ -117,10 +119,17 @@ function displayQuestions() {
       });
     }
   });
+
+  // Add a submit button at the bottom
+  const submitButton = document.createElement('button');
+  submitButton.textContent = "Submit";
+  submitButton.classList.add('btn');
+  submitButton.id = 'submit-btn';
+  submitButton.addEventListener('click', collectAnswers);
+  questionnaireDiv.appendChild(submitButton);
 }
 
-function collectAnswers(event) {
-  event.preventDefault();
+function collectAnswers() {
   const inputs = document.querySelectorAll('input[type="radio"]:checked');
   inputs.forEach(input => {
     userAnswers[input.name] = input.value;
@@ -135,7 +144,66 @@ function collectAnswers(event) {
   });
 
   if (allQuestionsAnswered) {
-    questionDiv.innerHTML = "<h2>Thank you for completing the questionnaire!</h2>";
+    inputs.forEach(input => {
+      const questionText = input.name;
+      const answer = input.value;
+
+      switch (questionText) {
+        case "Do you have access to a stable internet connection?":
+          userResponses.isInternetStable = answer;
+          break;
+        case "Are you currently incarcerated?":
+          userResponses.isIncarcerated = answer;
+          break;
+        case "Are you legally able to provide consent for the purposes of participating in this study?":
+          userResponses.isLegallyAbleToConsent = answer;
+          break;
+        case "You must be 18 years or older (or an adult in your country of origin).":
+          
+          if(choice === "I confirm that I am 18 years or older."){
+            userResponses.isEighteenOrOlder = "18 years or older";
+          }else{
+            userResponses.isEighteenOrOlder = "Younger than 18";
+          }
+          break;
+        case "You must not have a cognitive impairment that requires you to have a legally authorized representative (LAR) provide consent for you.":
+          if(choice === "I confirm that I do not have a cognitive impairment."){
+            userResponses.noCognitiveImpairment = "No Cognitive Impairment";
+          }else{
+            userResponses.noCognitiveImpairment = "Cognitive Impairment";
+          }
+          break;
+        case "Are you taking this on a personal computer?":
+          userResponses.isPersonalComputer = answer;
+          break;
+        case "Does your computer have 1 GB RAM?":
+          userResponses.hasGBRam = answer;
+          break;
+        case "Please look at the following demo:":
+          if(choice === "The demo is running smoothly"){
+            userResponses.demoPerformance = "Smooth";
+          }else{
+            userResponses.demoPerformance = "Laggy";
+          }
+          
+          break;
+        case "What is your prior experience with video games?":
+          userResponses.priorExperienceWithVideoGames = answer;
+          break;
+        case "I am experienced in playing video games":
+          userResponses.priorExperienceGeneral = answer;
+          break;
+        case "I am experienced in playing action-based video games":
+          userResponses.priorExperienceAction = answer;
+          break;
+        case "I am experienced in playing PC (personal computer) games":
+          userResponses.priorExperiencePC = answer;
+          break;
+        default:
+          break;
+      }
+    })
+    questionnaireDiv.innerHTML = "<h2>Thank you for completing the questionnaire!</h2>";
   } else {
     alert("Please answer all the questions.");
   }
@@ -143,7 +211,3 @@ function collectAnswers(event) {
 
 // Display all questions on page load
 window.onload = displayQuestions;
-
-// Add event listener for form submission
-const form = document.getElementById('pre-survey');
-form.addEventListener('submit', collectAnswers);
